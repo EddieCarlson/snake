@@ -1,15 +1,18 @@
 package eddie
 
 object Game extends App {
-  val initialBoard = Board.initial(10, 10)
-  var board = initialBoard
-  println(board)
-  val dirs = Seq(Right, Right, Right, Right, Down, Down, Down, Down, Left, Left, Left, Left, Up, Up, Up, Up)
-  1.to(7).foreach { i =>
-    dirs.foreach { dir =>
-      Thread.sleep(200L)
-      board = board.move(dir)
-      println(board)
-    }
+  val board = new Board(4, 4, Point(3, 3))
+  val snake = Snake.createSnake(board)
+
+  def play(s: Snake, b: Board): Unit = {
+    println(b.draw(s))
+    val move = RandomValidStrat.chooseMove(s, b)
+    val newSnake = s.move(move, b.food)
+    val newBoard = if (newSnake.body.head == b.food) b.placeFood(newSnake) else b
+    Thread.sleep(500L)
+    play(newSnake, newBoard)
   }
+
+  play(snake, board)
 }
+
