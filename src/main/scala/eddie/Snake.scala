@@ -2,7 +2,7 @@ package eddie
 
 import scala.util.Random
 
-trait Direction
+sealed trait Direction
 
 object Up extends Direction
 object Down extends Direction
@@ -11,10 +11,10 @@ object Right extends Direction
 
 case class Point(x: Int, y: Int) {
   def inDir(dir: Direction) = dir match {
+    case Up =>    Point(x, y - 1)
+    case Down =>  Point(x, y + 1)
     case Right => Point(x + 1, y)
-    case Left => Point(x - 1, y)
-    case Down => Point(x, y + 1)
-    case Up => Point(x, y - 1)
+    case Left =>  Point(x - 1, y)
   }
 }
 
@@ -40,30 +40,32 @@ class Snake(val body: List[Point]) {
   }
 }
 
-class Board(val width: Int, val height: Int, val food: Point) {
-  val top = "_" * width
-  val bot = "-" * width
-  val grid = 0.to(height - 1).map { y => 0.to(width - 1).map { x => Point(x, y) } }
-  val allPoints = grid.flatten.toSet
-
-  def inBounds(p: Point) = p.x >= 0 && p.y >= 0 && p.x < width && p.y < height
-
-  def drawPoint(p: Point, s: Snake) = {
+object Draw {
+  private def drawPoint(p: Point, s: Snake, food: Point) = {
     if (s.occupies(p))  "$"
     else if (p == food) "O"
     else                " "
   }
 
-  def draw(snake: Snake) = {
-    Seq(s" $top",
-      grid.map { row => row.map { drawPoint(_, snake) }.mkString("|", "", "|") }.mkString("\n"),
-      s" $bot").mkString("\n")
+  def draw(snake: Snake, food: Point, board: Board) = {
+    Seq(s" ${board.topBar}",
+      board.grid.map { row => row.map { drawPoint(_, snake, food) }.mkString("|", "", "|") }.mkString("\n"),
+      s" ${board.botBar}").mkString("\n")
   }
+}
 
-  def placeFood(snake: Snake): Board = {
+class Board(val width: Int, val height: Int) {
+  val topBar = "_" * width
+  val botBar = "-" * width
+
+  val grid = 0.to(height - 1).map { y => 0.to(width - 1).map { x => Point(x, y) } }
+  val allPoints = grid.flatten.toSet
+
+  def inBounds(p: Point) = p.x >= 0 && p.y >= 0 && p.x < width && p.y < height
+
+  def randomOpen(snake: Snake): Point = {
     val openPoints = allPoints -- snake.bodySet
-    val foodPoint = openPoints.toSeq(Random.nextInt(openPoints.size))
-    new Board(width, height, foodPoint)
+    openPoints.toSeq(Random.nextInt(openPoints.size))
   }
 }
 

@@ -1,18 +1,22 @@
 package eddie
 
-object Game extends App {
-  val board = new Board(4, 4, Point(3, 3))
-  val snake = Snake.createSnake(board)
+import scala.annotation.tailrec
 
-  def play(s: Snake, b: Board): Unit = {
-    println(b.draw(s))
-    val move = RandomValidStrat.chooseMove(s, b)
-    val newSnake = s.move(move, b.food)
-    val newBoard = if (newSnake.body.head == b.food) b.placeFood(newSnake) else b
+object Game extends App {
+  val board = new Board(4, 4)
+  val snake = Snake.createSnake(board)
+  val food = board.randomOpen(snake)
+
+  @tailrec
+  def play(s: Snake, b: Board, f: Point): Unit = {
+    println(Draw.draw(s, f, b))
+    val move = RandomValidStrat.chooseMove(s, b, f)
+    val newSnake = s.move(move, f)
+    val newFood = if (newSnake.body.head == f) b.randomOpen(newSnake) else f
     Thread.sleep(500L)
-    play(newSnake, newBoard)
+    play(newSnake, b, newFood)
   }
 
-  play(snake, board)
+  play(snake, board, food)
 }
 
