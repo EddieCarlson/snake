@@ -16,6 +16,13 @@ case class Point(x: Int, y: Int) {
     case Right => Point(x + 1, y)
     case Left =>  Point(x - 1, y)
   }
+
+  def dirTo(p: Point) = Seq(Up, Down, Left, Right).find(inDir(_) == p)
+
+  override def equals(other: Any) = other match {
+    case Point(ox, oy) => x == ox && y == oy
+    case _ => false
+  }
 }
 
 object Snake {

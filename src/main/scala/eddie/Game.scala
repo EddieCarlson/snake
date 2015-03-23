@@ -3,7 +3,7 @@ package eddie
 import scala.annotation.tailrec
 
 object Game extends App {
-  val board = new Board(4, 4)
+  val board = new Board(8, 8)
   val snake = Snake.createSnake(board)
   val food = board.randomOpen(snake)
 
@@ -13,7 +13,7 @@ object Game extends App {
     val move = RandomValidStrat.chooseMove(s, b, f)
     val newSnake = s.move(move, f)
     val newFood = if (newSnake.body.head == f) b.randomOpen(newSnake) else f
-    Thread.sleep(500L)
+    Thread.sleep(100L)
     play(newSnake, b, newFood)
   }
 
